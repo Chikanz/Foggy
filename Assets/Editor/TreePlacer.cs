@@ -9,6 +9,8 @@ public class TreePlacer : EditorWindow
     public GameObject[] objectsToPlace; // GameObject to place
     public Vector2 scaleRange;
 
+    public GameObject excludes;
+
 
     [MenuItem("ZacTools/Place Trees")]
     public static void ShowWindow()
@@ -20,7 +22,7 @@ public class TreePlacer : EditorWindow
     private void OnGUI()
     {
         numberOfObjects = EditorGUILayout.IntField("Number of objects", numberOfObjects);
-        scaleRange = EditorGUILayout.Vector2Field("Scale range", scaleRange);
+        scaleRange = EditorGUILayout.Vector2Field("Scale range", scaleRange);        
 
         //https://answers.unity.com/questions/859554/editorwindow-display-array-dropdown.html
         SerializedObject so = new SerializedObject(this);
@@ -60,7 +62,7 @@ public class TreePlacer : EditorWindow
         {
             //We've placed too many trees!
             loopBreak++;
-            if (loopBreak > 5000) return;
+            if (loopBreak > 50000) return;
 
             int posx = Random.Range(terrainPosX, terrainPosX + terrainWidth);            
             int posz = Random.Range(terrainPosZ, terrainPosZ + terrainLength);
@@ -70,7 +72,10 @@ public class TreePlacer : EditorWindow
 
             //Check if valid spawn
             var placepos = new Vector3(posx, posy, posz);
-            if (Physics.OverlapSphere(placepos, 1).Length > 1) continue;
+            var raypos = placepos + new Vector3(0, 100, 0);
+            RaycastHit hitinfo;
+            if (Physics.SphereCast(raypos, 3, Vector3.down, out hitinfo, 999, ~0, QueryTriggerInteraction.Collide) && !hitinfo.collider.tag.Equals("Terrain"))
+                continue;
 
             //Get random rotation
             Quaternion rot = Quaternion.Euler(0, Random.Range(0, 360), 0);
@@ -79,6 +84,6 @@ public class TreePlacer : EditorWindow
             newObject.transform.parent = parent.transform;
             newObject.transform.localScale = Vector3.one * Random.Range(scaleRange.x, scaleRange.y);
             placedObjects++;
-        }
+        }        
     }
 }

@@ -24,7 +24,7 @@ GameObject:
   - component: {fileID: 65599898649170656}
   m_Layer: 0
   m_Name: pCylinder83
-  m_TagString: Untagged
+  m_TagString: Tree
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -56,7 +56,8 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 2100000, guid: 7f5d2bd4909b87b43b961d8b0e29e378, type: 2}
+  - {fileID: 2100000, guid: f4723c26da616cf49a4e377eafd79047, type: 2}
+  - {fileID: 2100000, guid: b31f6b24f3049234593298f0e7622f61, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

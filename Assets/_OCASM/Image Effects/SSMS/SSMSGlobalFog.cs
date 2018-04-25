@@ -10,7 +10,7 @@ namespace SSMS
 	[RequireComponent (typeof(Camera))]
 	[AddComponentMenu ("OCASM/Image Effects/SSMS Global Fog")]
 	#if UNITY_5_4_OR_NEWER
-	//[ImageEffectAllowedInSceneView]
+	[ImageEffectAllowedInSceneView]
 	#endif
 	public class SSMSGlobalFog : MonoBehaviour {
 
@@ -106,9 +106,8 @@ namespace SSMS
 			}
 
             //Refersh the fog render texture when it's not the right size
-			if (saveFogRT && (fogRT == null || fogRT.height != source.height || fogRT.width != source.width))
+			if (saveFogRT && (fogRT == null || fogRT.height < source.height || fogRT.width < source.width))
             {
-                Debug.Log(source.width + " " + source.height);
 				fogRT = new RenderTexture (source.width, source.height, 0, RenderTextureFormat.Default);
 			}
 
@@ -177,6 +176,7 @@ namespace SSMS
 				fogRT.Release ();
 			}
 		}
-
+        
 	}
+
 }
