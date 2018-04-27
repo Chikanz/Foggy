@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using UnityEditorInternal;
 
 public class TreePlacer : EditorWindow
 {    
@@ -10,6 +11,8 @@ public class TreePlacer : EditorWindow
     public Vector2 scaleRange;
 
     public GameObject excludes;
+
+    public LayerMask mask;
 
 
     [MenuItem("ZacTools/Place Trees")]
@@ -30,6 +33,12 @@ public class TreePlacer : EditorWindow
 
         EditorGUILayout.PropertyField(stringsProperty, true); // True means show children
         so.ApplyModifiedProperties(); // Remember to apply modified properties
+
+        //Do some weird shit with the layer mask
+        //https://answers.unity.com/questions/42996/how-to-create-layermask-field-in-a-custom-editorwi.html
+        var tempMask = EditorGUILayout.MaskField(InternalEditorUtility.LayerMaskToConcatenatedLayersMask(mask), InternalEditorUtility.layers);
+        mask = InternalEditorUtility.ConcatenatedLayersMaskToLayerMask(tempMask);
+
 
         if (GUILayout.Button("Place!"))
         {
@@ -74,7 +83,7 @@ public class TreePlacer : EditorWindow
             var placepos = new Vector3(posx, posy, posz);
             var raypos = placepos + new Vector3(0, 100, 0);
             RaycastHit hitinfo;
-            if (Physics.SphereCast(raypos, 3, Vector3.down, out hitinfo, 999, ~0, QueryTriggerInteraction.Collide) && !hitinfo.collider.tag.Equals("Terrain"))
+            if (Physics.SphereCast(raypos, 3, Vector3.down, out hitinfo, 999, mask, QueryTriggerInteraction.Collide) && !hitinfo.collider.tag.Equals("Terrain"))
                 continue;
 
             //Get random rotation
