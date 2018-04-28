@@ -105,11 +105,12 @@ namespace SSMS
 				return;
 			}
 
-            //Refersh the fog render texture when it's not the right size
+            //Refresh the fog render texture when it's not the right size
 			if (saveFogRT && (fogRT == null || fogRT.height < source.height || fogRT.width < source.width))
-            {
-				fogRT = new RenderTexture (source.width, source.height, 0, RenderTextureFormat.Default);
-			}
+            {           
+                fogRT = new RenderTexture (source.width, source.height, 0, RenderTextureFormat.Default);
+                Debug.Log(fogRT.height + " " + source.height);
+            }
 
 			Camera cam = GetComponent<Camera>();
 			Transform camtr = cam.transform;

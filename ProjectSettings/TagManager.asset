@@ -8,6 +8,8 @@ TagManager:
   - Terrain
   - water
   - FogZone
+  - ColorZone
+  - CheckPoint
   layers:
   - Default
   - TransparentFX
