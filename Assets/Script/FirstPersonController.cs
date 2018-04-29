@@ -8,8 +8,8 @@ using Random = UnityEngine.Random;
 
 namespace UnityStandardAssets.Characters.FirstPerson
 {
-    [RequireComponent(typeof (CharacterController))]
-    [RequireComponent(typeof (AudioSource))]
+    [RequireComponent(typeof(CharacterController))]
+    [RequireComponent(typeof(AudioSource))]
     public class FirstPersonController : MonoBehaviour
     {
         [SerializeField] private bool m_IsWalking;
@@ -47,8 +47,13 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private Vector3 Checkpoint;
         private bool isFading;
 
+        public PostProcessingProfile[] ColorProfiles;
+
         public AudioClip lostSFX;
+        public AudioClip shutter;
+
         private bool playFootsteps = true;
+        
 
         // Use this for initialization
         private void Start()
@@ -59,10 +64,10 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_FovKick.Setup(m_Camera);
             m_HeadBob.Setup(m_Camera, m_StepInterval);
             m_StepCycle = 0f;
-            m_NextStep = m_StepCycle/2f;
+            m_NextStep = m_StepCycle / 2f;
             m_Jumping = false;
             m_AudioSource = GetComponent<AudioSource>();
-			m_MouseLook.Init(transform , m_Camera.transform);
+            m_MouseLook.Init(transform, m_Camera.transform);
 
             Checkpoint = transform.position;
         }
@@ -107,16 +112,16 @@ namespace UnityStandardAssets.Characters.FirstPerson
             float speed;
             GetInput(out speed);
             // always move along the camera forward as it is the direction that it being aimed at
-            Vector3 desiredMove = transform.forward*m_Input.y + transform.right*m_Input.x;
+            Vector3 desiredMove = transform.forward * m_Input.y + transform.right * m_Input.x;
 
             // get a normal for the surface that is being touched to move along it
             RaycastHit hitInfo;
             Physics.SphereCast(transform.position, m_CharacterController.radius, Vector3.down, out hitInfo,
-                               m_CharacterController.height/2f, Physics.AllLayers, QueryTriggerInteraction.Ignore);
+                               m_CharacterController.height / 2f, Physics.AllLayers, QueryTriggerInteraction.Ignore);
             desiredMove = Vector3.ProjectOnPlane(desiredMove, hitInfo.normal).normalized;
 
-            m_MoveDir.x = desiredMove.x*speed;
-            m_MoveDir.z = desiredMove.z*speed;
+            m_MoveDir.x = desiredMove.x * speed;
+            m_MoveDir.z = desiredMove.z * speed;
 
 
             if (m_CharacterController.isGrounded)
@@ -133,9 +138,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
             }
             else
             {
-                m_MoveDir += Physics.gravity*m_GravityMultiplier*Time.fixedDeltaTime;
+                m_MoveDir += Physics.gravity * m_GravityMultiplier * Time.fixedDeltaTime;
             }
-            m_CollisionFlags = m_CharacterController.Move(m_MoveDir*Time.fixedDeltaTime);
+            m_CollisionFlags = m_CharacterController.Move(m_MoveDir * Time.fixedDeltaTime);
 
             ProgressStepCycle(speed);
             UpdateCameraPosition(speed);
@@ -155,7 +160,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         {
             if (m_CharacterController.velocity.sqrMagnitude > 0 && (m_Input.x != 0 || m_Input.y != 0))
             {
-                m_StepCycle += (m_CharacterController.velocity.magnitude + (speed*(m_IsWalking ? 1f : m_RunstepLenghten)))*
+                m_StepCycle += (m_CharacterController.velocity.magnitude + (speed * (m_IsWalking ? 1f : m_RunstepLenghten))) *
                              Time.fixedDeltaTime;
             }
 
@@ -198,7 +203,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             {
                 m_Camera.transform.localPosition =
                     m_HeadBob.DoHeadBob(m_CharacterController.velocity.magnitude +
-                                      (speed*(m_IsWalking ? 1f : m_RunstepLenghten)));
+                                      (speed * (m_IsWalking ? 1f : m_RunstepLenghten)));
                 newCameraPosition = m_Camera.transform.localPosition;
                 newCameraPosition.y = m_Camera.transform.localPosition.y - m_JumpBob.Offset();
             }
@@ -247,7 +252,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         private void RotateView()
         {
-            m_MouseLook.LookRotation (transform, m_Camera.transform);
+            m_MouseLook.LookRotation(transform, m_Camera.transform);
         }
 
 
@@ -264,7 +269,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             {
                 return;
             }
-            body.AddForceAtPosition(m_CharacterController.velocity*0.1f, hit.point, ForceMode.Impulse);
+            body.AddForceAtPosition(m_CharacterController.velocity * 0.1f, hit.point, ForceMode.Impulse);
         }
 
 
@@ -273,7 +278,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         private void OnTriggerEnter(Collider other)
         {
-            if(other.tag.Equals("water"))
+            if (other.tag.Equals("water"))
             {
                 m_WalkSpeed = 2;
                 m_RunSpeed = 2;
@@ -285,20 +290,14 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 Debug.Log("start");
             }
 
-            if(other.tag.Equals("CheckPoint"))
+            if (other.tag.Equals("CheckPoint"))
             {
                 Checkpoint = other.transform.position + (Vector3.right * 0.5f);
             }
 
-            if(other.tag.Equals("ColorZone"))
+            if (other.tag.Equals("ColorZone"))
             {
-
-                ToggleColorGrading(false);
-
-                //profile.vignette.enabled = true;
-                //VignetteModel.Settings g = profile.vignette.settings;
-                //g.intensity = 1;
-                //profile.vignette.settings = g;
+                StartCoroutine(FadeColor(1));
             }
         }
 
@@ -330,7 +329,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             //increase fog density
             while (elapsed < duration)
             {
-                Debug.Log(elapsed/duration);
+                Debug.Log(elapsed / duration);
                 elapsed += Time.deltaTime;
                 fog.fogDensity = Mathf.Lerp(startDensity, endDensity, elapsed / duration);
                 yield return new WaitForEndOfFrame();
@@ -347,23 +346,45 @@ namespace UnityStandardAssets.Characters.FirstPerson
             isFading = false;
             playFootsteps = true;
             ambiance.SetActive(true);
-            
+
             transform.GetChild(0).GetChild(0).gameObject.SetActive(false); //Turn off blacc
         }
 
         void ToggleColorGrading(bool yeah)
         {
-            PostProcessingBehaviour filters = GetComponentInChildren<PostProcessingBehaviour>();
 
-            //modify current profile
-            PostProcessingProfile profile = filters.profile;
-
-            profile.colorGrading.enabled = yeah;            
         }
 
+        //Reset post process profile
         private void OnDisable()
         {
-            ToggleColorGrading(true);
+            PostProcessingBehaviour filters = GetComponentInChildren<PostProcessingBehaviour>();
+            filters.profile = ColorProfiles[0];
+        }
+
+        IEnumerator FadeColor(float clickTime)
+        {
+            PostProcessingBehaviour filters = GetComponentInChildren<PostProcessingBehaviour>();
+            var ambiance = GameObject.Find("Ambiance");
+            playFootsteps = false;            
+
+            for (int i = 1; i < ColorProfiles.Length; i++)
+            {
+                filters.profile = ColorProfiles[i];
+                GetComponent<AudioSource>().PlayOneShot(shutter);
+                yield return new WaitForSeconds(clickTime);
+            }
+
+            playFootsteps = true;
+
+            //Slow it waaaaaayyyy dooooowwwwnnnnn
+            GetComponent<AudioSource>().pitch = 0.5f;
+            ambiance.GetComponent<AudioSource>().pitch = 0.5f;
+
+            var main = GetComponentInChildren<ParticleSystem>().main;
+            main.simulationSpeed = 0.25f;
+
+            GameObject.Find("Crows").SetActive(false);
         }
     }
 }

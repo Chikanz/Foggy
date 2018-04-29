@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class randomSound : MonoBehaviour {
 
-    public int SoundDelayMax;
+    public Vector2 RandomRange;
 
     public AudioClip[] clips;
 
@@ -12,14 +12,28 @@ public class randomSound : MonoBehaviour {
 	
 	void Start ()
     {
-        Invoke("PlaySound", Random.Range(5, SoundDelayMax));
+        QueueSound();
     }
 
     void PlaySound()
     {
-        if(!Lost.activeInHierarchy)
-            GetComponent<AudioSource>().PlayOneShot(clips[Random.Range(0, clips.Length)]);
-        Invoke("PlaySound", Random.Range(5, SoundDelayMax));
+        //Get random child, play random clip
+        if (!Lost.activeInHierarchy) //don't play sound when lost
+        {
+            transform.GetChild(Random.Range(0,transform.childCount)).
+                GetComponent<AudioSource>().PlayOneShot(clips[Random.Range(0, clips.Length)]);
+        }
+       
+        QueueSound();
     }
 
+    void QueueSound()
+    {
+        Invoke("PlaySound", Random.Range((int)RandomRange.x, (int)RandomRange.y));
+    }
+
+    private void OnDisable()
+    {
+        CancelInvoke();
+    }
 }
